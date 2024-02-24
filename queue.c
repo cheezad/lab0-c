@@ -47,7 +47,7 @@ bool q_insert_head(struct list_head *head, char *s)
     if (!new)
         return false;
     size_t len = strlen(s) + 1;
-    new->value = (char *) malloc(sizeof(len));
+    new->value = (char *) malloc(len);
     if (!new->value) {
         free(new);
         return false;
@@ -68,7 +68,7 @@ bool q_insert_tail(struct list_head *head, char *s)
     if (!new)
         return false;
     size_t len = strlen(s) + 1;
-    new->value = (char *) malloc(sizeof(len));
+    new->value = (char *) malloc(len);
     if (!new->value) {
         free(new);
         return false;
@@ -85,9 +85,11 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     if (!head || head == head->next)
         return NULL;
     element_t *temp = list_first_entry(head, element_t, list);
-    strncpy(sp, temp->value, bufsize);
-    sp[bufsize - 1] = '\0';
-    list_del(&temp->list);
+    if (sp && temp->value) {
+        strncpy(sp, temp->value, bufsize);
+        sp[bufsize - 1] = '\0';
+    }
+    list_del(head->next);
     return temp;
 }
 
@@ -97,9 +99,11 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     if (!head || head == head->next)
         return NULL;
     element_t *temp = list_last_entry(head, element_t, list);
-    strncpy(sp, temp->value, bufsize);
-    sp[bufsize - 1] = '\0';
-    list_del(&temp->list);
+    if (sp && temp->value) {
+        strncpy(sp, temp->value, bufsize);
+        sp[bufsize - 1] = '\0';
+    }
+    list_del(head->prev);
     return temp;
 }
 
@@ -120,6 +124,17 @@ int q_size(struct list_head *head)
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    if (list_empty(head) || list_is_singular(head))
+        return false;
+    struct list_head **indir = &head;
+    for (struct list_head *fast = (head)->next;
+         fast != head && fast->next != head; fast = fast->next->next)
+        indir = &(*indir)->next;
+    element_t *temp = list_entry(*indir, element_t, list);
+    *indir = (*indir)->next;
+    if (temp->value)
+        free(temp->value);
+    free(temp);
     return true;
 }
 
