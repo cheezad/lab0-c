@@ -146,7 +146,19 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head || head->next == head)
+        return;
+
+    struct list_head *node = head;
+    do {
+        struct list_head *temp = node->next;
+        node->next = node->prev;
+        node->prev = temp;
+        node = temp;
+    } while (node != head);
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
@@ -178,5 +190,5 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    return false;
 }
