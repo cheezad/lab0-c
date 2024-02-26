@@ -215,7 +215,27 @@ void q_sort(struct list_head *head, bool descend)
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || head->next == head)
+        return 0;
+
+    struct list_head *curr = head->prev;
+    char *curr_min = list_entry(curr, element_t, list)->value;
+    int i = 0;
+    while (curr != head) {
+        element_t *temp = list_entry(curr, element_t, list);
+        if (strcmp(temp->value, curr_min) <= 0) {
+            curr_min = temp->value;
+            curr = curr->prev;
+            i++;
+            continue;
+        }
+        struct list_head *next_node = curr->prev;
+        list_del(curr);
+        free(temp->value);
+        free(temp);
+        curr = next_node;
+    }
+    return i;
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
@@ -223,7 +243,27 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || head->next == head)
+        return 0;
+
+    struct list_head *curr = head->prev;
+    char *curr_max = list_entry(curr, element_t, list)->value;
+    int i = 0;
+    while (curr != head) {
+        element_t *temp = list_entry(curr, element_t, list);
+        if (strcmp(temp->value, curr_max) >= 0) {
+            curr_max = temp->value;
+            curr = curr->prev;
+            i++;
+            continue;
+        }
+        struct list_head *next_node = curr->prev;
+        list_del(curr);
+        free(temp->value);
+        free(temp);
+        curr = next_node;
+    }
+    return i;
 }
 
 void q_merge_two(struct list_head *first,
