@@ -11,6 +11,11 @@
  */
 
 
+void q_merge_two(struct list_head *first,
+                 struct list_head *second,
+                 bool descend);
+
+
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -148,7 +153,7 @@ void q_swap(struct list_head *head)
     list_for_each (temp, head) {
         if (temp->next == head)
             break;
-        list_move(temp->next, temp);
+        list_move(temp, temp->next);
     }
 }
 
@@ -174,7 +179,19 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || head->next == head || head->prev == head->next)
+        return;
+    struct list_head *slow = head, *fast = head->next;
+    for (; fast != head && fast->next != head; fast = fast->next->next)
+        slow = slow->next;
+    struct list_head left;
+    list_cut_position(&left, head, slow);
+    q_sort(&left, descend);
+    q_sort(head, descend);
+    q_merge_two(head, &left, descend);
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
@@ -196,7 +213,7 @@ void q_merge_two(struct list_head *first,
                  struct list_head *second,
                  bool descend)
 {
-    if (!first || first->next == first)
+    if (!first || !second)
         return;
 
     struct list_head temp;
@@ -209,12 +226,12 @@ void q_merge_two(struct list_head *first,
         if (descend)
             checker = strcmp(first_str, second_str) > 0;
         else
-            checker = strcmp(first_str, second_str) <= 0;
+            checker = strcmp(first_str, second_str) < 0;
         element_t *add_first = checker ? first_top : second_top;
         list_move_tail(&add_first->list, &temp);
     }
-    list_splice_init(first, &temp);
-    list_splice_init(second, &temp);
+    list_splice_tail_init(first, &temp);
+    list_splice_tail_init(second, &temp);
     list_splice(&temp, first);
 }
 
@@ -235,6 +252,8 @@ int q_merge(struct list_head *head, bool descend)
     queue_contex_t *end = NULL;
     while (second != end) {
         size += q_size(second->q);
+        q_sort(first->q, descend);
+        q_sort(second->q, descend);
         q_merge_two(first->q, second->q, descend);
         if (!end)
             end = second;
