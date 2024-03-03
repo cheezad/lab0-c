@@ -352,3 +352,23 @@ int q_merge(struct list_head *head, bool descend)
     }
     return size;
 }
+
+/* Shuffle using Fisher-Yates shuffle algorithm */
+void q_shuffle(struct list_head *head)
+{
+    if (!head || list_empty(head))
+        return;
+    int len = q_size(head);
+
+    for (int i = 0; i < len;) {
+        struct list_head *start = head->next;
+        int rand_num = rand() % len;
+        for (int j = 0; j < rand_num; j++) {
+            start = start->next;
+        }
+        list_del(start);
+        list_add_tail(start, head);
+        len--;
+    }
+    return;
+}
