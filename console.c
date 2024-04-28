@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "console.h"
+#include "game.h"
 #include "report.h"
 #include "web.h"
 
@@ -414,6 +415,16 @@ static bool do_web(int argc, char *argv[])
     return true;
 }
 
+static bool do_ttt(int argc, char *argv[])
+{
+    char table[N_GRIDS];
+    memset(table, ' ', N_GRIDS);
+
+    draw_board(table);
+
+    return true;
+}
+
 /* Initialize interpreter */
 void init_cmd()
 {
@@ -431,6 +442,7 @@ void init_cmd()
     ADD_COMMAND(log, "Copy output to file", "file");
     ADD_COMMAND(time, "Time command execution", "cmd arg ...");
     ADD_COMMAND(web, "Read commands from builtin web server", "[port]");
+    ADD_COMMAND(ttt, "Do tic-tac-toe game", "");
     add_cmd("#", do_comment_cmd, "Display comment", "...");
     add_param("simulation", &simulation, "Start/Stop simulation mode", NULL);
     add_param("verbose", &verblevel, "Verbosity level", NULL);
