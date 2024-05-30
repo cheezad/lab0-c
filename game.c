@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "game.h"
 
@@ -85,6 +87,8 @@ int *available_moves(const char *table)
 
 void draw_board(const char *t)
 {
+    (void) !write(STDOUT_FILENO, "\x1b[2J", 4);
+    (void) !write(STDOUT_FILENO, "\x1b[H", 3);
     for (int i = 0; i < BOARD_SIZE; i++) {
         if (BOARD_SIZE < 10)
             printf("%2d | ", i + 1);
