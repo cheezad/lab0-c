@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "game.h"
@@ -85,10 +87,37 @@ int *available_moves(const char *table)
     return moves;
 }
 
+time_t rawtime;
+struct tm *timeinfo;
+
+void print_time()
+{
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    char timebuf[100];
+    strftime(timebuf, 100, "%c", timeinfo);
+    printf("Current local time and date: %s\n", timebuf);
+}
+
+void edit_time()
+{
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    char buf[100];
+    char timebuf[30];
+    strftime(timebuf, 100, "%c", timeinfo);
+    snprintf(buf, sizeof(buf),
+             "\x1b[%d;%dHCurrent local time and date: %s\x1b[%d;%dH>", 1, 1,
+             timebuf, 8, 2);
+    puts(buf);
+    alarm(1);
+}
+
 void draw_board(const char *t)
 {
     (void) !write(STDOUT_FILENO, "\x1b[2J", 4);
     (void) !write(STDOUT_FILENO, "\x1b[H", 3);
+    print_time();
     for (int i = 0; i < BOARD_SIZE; i++) {
         if (BOARD_SIZE < 10)
             printf("%2d | ", i + 1);

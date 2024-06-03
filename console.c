@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -447,6 +448,8 @@ static int get_input(char player)
 
     int x = -1, y = -1;
     while (x < 0 || x > (BOARD_SIZE - 1) || y < 0 || y > (BOARD_SIZE - 1)) {
+        signal(SIGALRM, edit_time);
+        alarm(1);
         printf("%c> ", player);
         int r = getline(&line, &line_length, stdin);
         if (r == -1)
@@ -511,10 +514,12 @@ static bool do_ttt(int argc, char *argv[])
         if (win == 'D') {
             draw_board(table);
             printf("It is a draw!\n");
+            alarm(0);
             break;
         } else if (win != ' ') {
             draw_board(table);
             printf("%c won!\n", win);
+            alarm(0);
             break;
         }
 
