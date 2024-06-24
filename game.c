@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -101,15 +102,32 @@ void print_time()
 
 void edit_time()
 {
+    int tty;
+    tty = open("/dev/tty", O_RDWR);
+    if (tty == -1) {
+        close(tty);
+        return;
+    }
+
+    char *temp = "\033[?25l";
+    if (write(tty, temp, strlen(temp)) != strlen(temp))
+        return;
+
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     char buf[100];
     char timebuf[30];
     strftime(timebuf, 100, "%c", timeinfo);
-    snprintf(buf, sizeof(buf),
-             "\x1b[%d;%dHCurrent local time and date: %s\x1b[%d;%dH>", 1, 1,
-             timebuf, 8, 2);
-    puts(buf);
+    int len = snprintf(buf, sizeof(buf),
+                       "\x1b[%d;%dHCurrent local time and date: %s\x1b[%d;%dH",
+                       1, 1, timebuf, 8, 4);
+    (void) !write(tty, buf, len);
+
+    temp = "\033[?12;25h";
+    if (write(tty, temp, strlen(temp)) != strlen(temp))
+        return;
+
+    close(tty);
     alarm(1);
 }
 
